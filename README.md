@@ -38,10 +38,10 @@ You can additionally make the text within the span render as inline code by wrap
 
 As an alternative to the above, if you'd like inline code spans to always be click-to-copy without having to add the extra tokens, there is an option to enable this in settings. 
 
-If you double the start token, then the span will render its text as dots, to obfuscate things like passwords. If you double the end token, then the plugin will attempt to clear your clipboard after 15 seconds. When a span is rendered as a password, right clicking it will toggle between displaying dots and the actual text. 
+If you double the start token, then the span will render its text as dots, to obfuscate things like passwords. If you double the end token, then the plugin will attempt to clear your clipboard after a configurable delay (15 seconds by default), unless you disable this in settings. When a span is rendered as a password, right clicking it will toggle between displaying dots and the actual text. 
 
 ```
-[[[[`This will show up as dots, and be erased from the clipboard 15 seconds after being clicked`]]]]
+[[[[`This will show up as dots, and be erased from the clipboard after the configured delay (15 seconds by default)`]]]]
 ```
 
 ## Screenshots
@@ -64,6 +64,8 @@ There is a settings page for the plugin in the Joplin options. There, you can:
 * Disable having the spans appear in the editor if you'd prefer only the raw text there
 * Choose if the start and end tokens are shown or hidden, when displaying spans in the editor is enabled
 * Enable or disable having inline code spans be click-to-copy in the webview and editor
+* Enable or disable automatically clearing the clipboard after clicking a password span
+* Set how many seconds to wait before the clipboard is cleared (default: 15)
 
 ![](screenshots/settings.png)
 

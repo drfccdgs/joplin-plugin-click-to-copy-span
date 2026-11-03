@@ -62,6 +62,25 @@ joplin.plugins.register({
 		    	value: 'false',
 		    	label: 'Hide delimiting backticks when making inline code click-to-copy in the editor',
 		    	description: 'This option does nothing if the above option isn\'t also enabled',
+		    },
+		    clearPasswordClipboard: {
+		    	section: 'clickToCopySpans',
+		    	public: true,
+		    	type: SettingItemType.Bool,
+		    	value: true,
+		    	label: 'Automatically clear the clipboard after clicking a password span',
+		    	description: 'Applies to spans with a doubled end token',
+		    },
+		    clearClipboardDelay: {
+		    	section: 'clickToCopySpans',
+		    	public: true,
+		    	type: SettingItemType.Int,
+		    	value: 15,
+		    	minimum: 1,
+		    	maximum: 3600,
+		    	step: 1,
+		    	label: 'Seconds until the clipboard is cleared after clicking a password span',
+		    	description: 'Only used if the option above is enabled',
 		    }
 		});
 
@@ -102,13 +121,15 @@ joplin.plugins.register({
 					break;
 				case 'copyPassword':
 					const password = message.data.text;
+					const clearEnabled = await joplin.settings.value('clearPasswordClipboard');
+					const clearSeconds = Math.max(1, Number(await joplin.settings.value('clearClipboardDelay')) || 15);
 					joplin.clipboard.writeText(password);
-					setTimeout(async () => {
+					if (clearEnabled) setTimeout(async () => {
 						const currentClipboard = await joplin.clipboard.readText();
 						if (currentClipboard === password) {
 							await joplin.clipboard.writeText(' ');
 						}
-					}, 15000);
+					}, clearSeconds * 1000);
 					break;
 				case 'getSettings':
 					const [showInEditor, hideMarkdown, startToken, endToken, inlineCodeEditor, hideCodeDelimiters] = await Promise.all([
@@ -133,20 +154,22 @@ joplin.plugins.register({
 			ContentScriptType.MarkdownItPlugin,
 			webviewScriptId,
 			'webviewScript.js');
-		await joplin.contentScripts.onMessage(webviewScriptId, (message: { name: string, data: { [key: string]: any } }) => {
+		await joplin.contentScripts.onMessage(webviewScriptId, async (message: { name: string, data: { [key: string]: any } }) => {
 			switch (message.name) {
 				case 'copyText':
 					joplin.clipboard.writeText(message.data.text);
 					break;
 				case 'copyPassword':
 					const password = message.data.text;
+					const clearEnabled = await joplin.settings.value('clearPasswordClipboard');
+					const clearSeconds = Math.max(1, Number(await joplin.settings.value('clearClipboardDelay')) || 15);
 					joplin.clipboard.writeText(password);
-					setTimeout(async () => {
+					if (clearEnabled) setTimeout(async () => {
 						const currentClipboard = await joplin.clipboard.readText();
 						if (currentClipboard === password) {
 							await joplin.clipboard.writeText(' ');
 						}
-					}, 15000);
+					}, clearSeconds * 1000);
 					break;
 				default:
 					break;
